@@ -1,0 +1,10 @@
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/your_item_id"
+        android:icon="@drawable/ic_settings_white_24dp"
+        android:title="anan"
+        app:showAsAction="always" />
+
+
+</menu>

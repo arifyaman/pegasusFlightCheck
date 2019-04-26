@@ -1,78 +1,181 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="20dp"
-    tools:context=".MainActivity" >
+    tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/textView"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Tarih" />
+        android:gravity="center"
+        android:orientation="vertical">
 
-    <EditText
-        android:id="@+id/dateInput"
+        <ImageButton
+            android:id="@+id/date_previous_button"
+            style="@style/Widget.AppCompat.ImageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_marginStart="2dp"
+            android:backgroundTint="@color/colorAccent"
+            android:scaleType="centerInside"
+            android:tint="@color/productGridBackgroundColor"
+            app:srcCompat="@drawable/ic_arrow_back_black_24dp" />
+
+        <Button
+            android:id="@+id/datePickerButton"
+
+            style="@style/buttonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="Select Date" />
+
+        <ImageButton
+            android:id="@+id/date_next_button"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_alignParentEnd="true"
+            android:backgroundTint="@color/colorAccent"
+            android:scaleType="centerInside"
+            android:tint="@color/productGridBackgroundColor"
+            app:srcCompat="@drawable/ic_arrow_forward_black_24dp" />
+    </RelativeLayout>
+
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="date"
-        android:text="2019-05-23" />
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/dateText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="2019-01-01"
+            android:textSize="20sp" />
+
+    </RelativeLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
         android:orientation="horizontal">
 
-        <EditText
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="80dp"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="From"
+            android:textAlignment="gravity" />
+
+        <Spinner
             android:id="@+id/depPort"
-            android:layout_width="124dp"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="textPersonName"
-            android:text="DOH" />
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:spinnerMode="dropdown" />
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <ImageButton
+            android:id="@+id/reverse_button"
+            style="@style/Widget.AppCompat.ImageButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginStart="2dp"
+            android:backgroundTint="@color/colorAccent"
+            android:scaleType="centerInside"
+            android:tint="@color/loginPageBackgroundColor"
+            app:srcCompat="@mipmap/up_down" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
 
         <TextView
             android:id="@+id/textView2"
-            android:layout_width="27dp"
-            android:layout_height="wrap_content"
-            android:text="to" />
+            android:layout_width="80dp"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="to"
+            android:textAlignment="gravity" />
 
-        <EditText
+        <Spinner
             android:id="@+id/arPort"
-            android:layout_width="151dp"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="textPersonName"
-            android:text="IST_SAW" />
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:spinnerMode="dropdown" />
+
     </LinearLayout>
 
     <Button
         android:id="@+id/sendButton"
+        android:layout_width="347dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="6dp"
+        android:text="Search" />
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:layout_marginBottom="30dp"
-        android:text="Search" />
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/saveButton"
+            android:layout_width="154dp"
+            android:layout_height="36dp"
+            android:layout_gravity="right"
+            android:text="Save This Search"
+            android:textAllCaps="false"
+            android:textSize="10sp" />
+
+
+    </LinearLayout>
+
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_gravity="center">
+
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" >
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:orientation="vertical">
+
 
             <TextView
                 android:id="@+id/responseText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="TextView"
-                android:textSize="24sp" />
+                android:text="Waiting for search..."
+                android:textSize="16sp" />
+
         </LinearLayout>
     </ScrollView>
+
 
 </LinearLayout>
