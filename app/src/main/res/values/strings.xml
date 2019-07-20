@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Pegasus Cheap Flight Search</string>
+    <string name="title_activity_select_pnr">SelectPnrActivity</string>
+    <string name="action_settings">Settings</string>
 </resources>

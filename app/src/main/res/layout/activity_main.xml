@@ -28,7 +28,6 @@
         <Button
             android:id="@+id/datePickerButton"
 
-            style="@style/buttonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
@@ -128,6 +127,16 @@
     </LinearLayout>
 
     <Button
+        android:id="@+id/loginButton"
+        android:layout_width="347dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="6dp"
+        android:text="Login" />
+
+    <Button
         android:id="@+id/sendButton"
         android:layout_width="347dp"
         android:layout_height="wrap_content"
@@ -155,12 +164,14 @@
 
 
     <ScrollView
+
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center">
 
 
         <LinearLayout
+            android:id="@+id/scrl_search_result"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center_horizontal"

@@ -1,9 +1,33 @@
 package com.xlip.pegasusflightchecker.model;
 
-public class Flight {
+import java.io.Serializable;
+
+public class Flight implements Serializable {
+
+    private static final long serialVersionUID = -6531541454953778527L;
+
     private String date;
     private String currency;
+    private String departureDateTime;
     private double amount;
+    private Fare fare;
+
+
+    public String getDepartureDateTime() {
+        return departureDateTime;
+    }
+
+    public void setDepartureDateTime(String departureDateTime) {
+        this.departureDateTime = departureDateTime;
+    }
+
+    public Fare getFare() {
+        return fare;
+    }
+
+    public void setFare(Fare fare) {
+        this.fare = fare;
+    }
 
     public String getDate() {
         return date;

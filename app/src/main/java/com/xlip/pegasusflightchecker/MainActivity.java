@@ -1,22 +1,27 @@
 package com.xlip.pegasusflightchecker;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
 import com.xlip.pegasusflightchecker.fragment.MyDatePickerFragment;
 import com.xlip.pegasusflightchecker.fragment.SelectSavedSearchFragment;
@@ -26,6 +31,7 @@ import com.xlip.pegasusflightchecker.model.AvailabilityResponse;
 import com.xlip.pegasusflightchecker.model.Flight;
 import com.xlip.pegasusflightchecker.model.FlightSearchList;
 import com.xlip.pegasusflightchecker.model.PortCode;
+import com.xlip.pegasusflightchecker.otherActivities.SelectPnrActivity;
 import com.xlip.pegasusflightchecker.storage.MyData;
 import com.xlip.pegasusflightchecker.storage.MyStorage;
 import com.xlip.pegasusflightchecker.storage.SearchObject;
@@ -35,11 +41,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements HttpClient.HttpClientCallbacks, SelectSavedSearchFragment.SelectSavedSearchFragmentCallback, MyDatePickerFragment.DatePickerCallback {
 
     private Button sendButton;
+    private Button loginButton;
     private Button datePickerButton;
     private Button saveButton;
     private ImageButton dateNextButton;
@@ -50,6 +58,11 @@ public class MainActivity extends AppCompatActivity implements HttpClient.HttpCl
     private Spinner depPort;
     private Spinner arPort;
     private AutoCompleteTextView autoCompleteTextView;
+    private LinearLayout resultLayout;
+
+    private HttpClient httpClient;
+
+
 
 
     private Gson gson;
@@ -67,14 +80,23 @@ public class MainActivity extends AppCompatActivity implements HttpClient.HttpCl
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        this.httpClient = new HttpClient(this);
         gson = new Gson();
+
+        new Thread(() -> {
+            HttpClient.getJson("https://web.flypgs.com/pegasus/app-init", "init", this);
+        }).start();
+
+
         portCodes = gson.fromJson(depJson, new TypeToken<List<PortCode>>() {
         }.getType());
 
 
         codeArray = new ArrayList<>();
-        portCodes.forEach(port -> codeArray.add(port.getT() + " - " + port.getC()));
+        for (PortCode port: portCodes) {
+            codeArray.add(port.getT() + " - " + port.getC());
+
+        }
 
         depPort = findViewById(R.id.depPort);
         arPort = findViewById(R.id.arPort);
@@ -82,6 +104,8 @@ public class MainActivity extends AppCompatActivity implements HttpClient.HttpCl
         ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, codeArray); //selected item will look like a spinner set from XML
         spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
+
+        resultLayout = findViewById(R.id.scrl_search_result);
 
         depPort.setAdapter(spinnerArrayAdapter);
         depPort.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -132,6 +156,11 @@ public class MainActivity extends AppCompatActivity implements HttpClient.HttpCl
             search();
         });
 
+        loginButton = findViewById(R.id.loginButton);
+        loginButton.setOnClickListener((View v) -> {
+            login();
+        });
+
         dateBeforeButton = findViewById(R.id.date_previous_button);
         dateBeforeButton.setOnClickListener((View v) -> {
             myDatePickerFragment.oneDayBefore();
@@ -159,9 +188,25 @@ public class MainActivity extends AppCompatActivity implements HttpClient.HttpCl
         AvailabilityRequest request = createAvailabilityReqeust(dateText.getText().toString(), depPortText, arPortText);
         String payload = gson.toJson(request);
         new Thread(() -> {
-            HttpClient.getInstance().postO("https://web.flypgs.com/pegasus/availability", payload, MainActivity.this);
+            httpClient.postJson("https://web.flypgs.com/pegasus/availability", payload, "searchList", MainActivity.this);
         }).start();
     }
+
+    private void login() {
+        HashMap<String, String> params = new HashMap<>();
+        params.put("UserName", "905433214929");
+        params.put("Password", "785666");
+        params.put("Mask", "+90(###)###-####");
+        params.put("Country", "TR");
+        params.put("RememberMe", "false");
+        params.put("DeviceType", "Desktop");
+        params.put("ScreenCode", "1000");
+
+        new Thread(() -> {
+            httpClient.postForm("https://web.flypgs.com/pegasus/availability", params, "login", MainActivity.this);
+        }).start();
+    }
+
 
     private void setUpFragments() {
         myDatePickerFragment = new MyDatePickerFragment();
@@ -239,46 +284,87 @@ public class MainActivity extends AppCompatActivity implements HttpClient.HttpCl
 
 
     @Override
-    public void responseReceived(JSONObject response) {
+    public void responseReceived(JSONObject response, String operation) {
         runOnUiThread(() -> {
+            Log.d("response", response.toString());
+            if (operation.equals("searchList")) {
 
-                    Log.d("response", response.toString());
-                    try {
-                        JSONArray array = response.getJSONArray("departureRouteList");
-                        JSONObject depRouteList = array.getJSONObject(0);
-                        JSONArray dailyFlightList = depRouteList.getJSONArray("dailyFlightList");
 
-                        AvailabilityResponse availabilityResponse = new AvailabilityResponse();
 
-                        String responseText = "";
-                        for (int i = 0; i < dailyFlightList.length(); i++) {
-                            Flight flight = new Flight();
+                try {
+                    JSONArray array = response.getJSONArray("departureRouteList");
+                    JSONObject depRouteList = array.getJSONObject(0);
+                    JSONArray dailyFlightList = depRouteList.getJSONArray("dailyFlightList");
 
-                            JSONObject date1 = dailyFlightList.getJSONObject(i);
-                            flight.setDate(date1.getString("date"));
-
-                            JSONObject cheapestFare = date1.getJSONObject("cheapestFare");
-
-                            flight.setAmount(cheapestFare.getDouble("amount"));
-                            flight.setCurrency(cheapestFare.getString("currency"));
-
-                            availabilityResponse.getFlights().add(flight);
-
-                            responseText += "Date: " + flight.getDate() + "\n";
-                            responseText += "Currency: " + flight.getCurrency() + "\n";
-                            responseText += "Amount: " + flight.getAmount() + "\n";
-                            responseText += "\n";
-                        }
-
-                        this.responseText.setText(responseText);
-
-                        saveButton.setVisibility(View.VISIBLE);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        Toast.makeText(getApplicationContext(), "Response failed please check you inputs", Toast.LENGTH_LONG).show();
+                    List<JSONArray> flightListArray = new ArrayList<>();
+                    for (int i = 0; i < dailyFlightList.length(); i++) {
+                        flightListArray.add( dailyFlightList.getJSONObject(0).getJSONArray("flightList"));
                     }
+
+                    AvailabilityResponse availabilityResponse = new AvailabilityResponse();
+
+                    String responseText = "";
+                    for (int i = 0; i < dailyFlightList.length(); i++) {
+                        Flight flight = new Flight();
+                        JSONObject flightJsonObject = dailyFlightList.getJSONObject(i);
+
+
+                        flight.setDate(flightJsonObject.getString("date"));
+
+                        JSONObject cheapestFare = flightJsonObject.getJSONObject("cheapestFare");
+
+                        flight.setAmount(cheapestFare.getDouble("amount"));
+                        flight.setCurrency(cheapestFare.getString("currency"));
+
+                        availabilityResponse.getFlights().add(flight);
+
+                        responseText += "Date: " + flight.getDate() + "\n";
+                        responseText += "Currency: " + flight.getCurrency() + "\n";
+                        responseText += "Amount: " + flight.getAmount() + "\n";
+                        responseText += "\n";
+                    }
+
+                    AvailabilityResponse availabilityResponse2 = new AvailabilityResponse();
+
+                    for (JSONArray flightListJsonArray : flightListArray) {
+                        for (int i = 0; i < flightListJsonArray.length(); i++) {
+
+                            JSONObject flightJsonObject = flightListJsonArray.getJSONObject(i);
+                            Flight flight = gson.fromJson(flightJsonObject.toString(), Flight.class);
+                            availabilityResponse2.getFlights().add(flight);
+
+                        }
+                    }
+
+                    resultLayout.removeAllViews();
+
+                    this.responseText = new TextView(this);
+                    this.responseText.setText(responseText);
+                    saveButton.setVisibility(View.VISIBLE);
+                    resultLayout.addView(this.responseText);
+
+
+                    Button goToPnr = new Button(this);
+                    goToPnr.setText("Create PNR");
+                    goToPnr.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                    goToPnr.setOnClickListener((view -> {
+                        Intent intent = new Intent(this, SelectPnrActivity.class);
+                        intent.putExtra("flightList", availabilityResponse2);
+                        startActivity(intent);
+                    }));
+
+                    resultLayout.addView(goToPnr);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Toast.makeText(getApplicationContext(), "Response failed please check you inputs", Toast.LENGTH_LONG).show();
                 }
-        );
+
+            } else if (operation.equals("login")) {
+                Toast.makeText(getApplicationContext(), "Successfully Loged in", Toast.LENGTH_LONG).show();
+
+            }
+        });
 
 
     }
